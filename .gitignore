@@ -28,7 +28,7 @@ instance/
 config.json
 
 # Large Model & Data Files
-deepfake_detection_lstm.keras
+
 *.h5
 *.tflite
 *.onnx
