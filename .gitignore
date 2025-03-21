@@ -1,0 +1,45 @@
+# Python & Virtual Environment
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+venv/
+env/
+*.venv
+*.env
+.DS_Store
+
+# IDE & Editor Files
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Logs & Debug Files
+logs/
+*.log
+*.out
+*.err
+
+# Render, Gunicorn & Deployment
+*.pid
+*.sock
+instance/
+config.json
+
+# Large Model & Data Files
+deepfake_detection_lstm.keras
+*.h5
+*.tflite
+*.onnx
+*.pth
+*.pt
+*.ckpt
+
+# Node.js Files (if using any frontend)
+node_modules/
+npm-debug.log
+
+# Environment Variables
+.env
+.env.local

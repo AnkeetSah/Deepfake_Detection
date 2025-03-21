@@ -1,0 +1,40 @@
+How __name__ Helps Flask:
+In Flask, __name__ plays a crucial role in locating the main entry file and determining the relative paths for templates and static files.
+
+Here’s why it matters:
+__name__ tells Flask the location of the current file. This helps Flask know where the starting point of the app is.
+Flask uses this information to set up the app's root directory and locate the necessary resources (like templates, static files, etc.).
+
+Why __name__:
+__name__ is a special variable that holds the name of the module currently being executed.
+Flask uses it to determine the location of the app and locate other resources like templates and static files.
+
+Flask uses __name__ to determine:
+
+The location of the app file (app.py in your case).
+Where to find static files and templates, which are typically stored in separate folders.
+Templates are typically stored in a templates/ folder (e.g., index.html files).
+Static files like CSS and JavaScript are stored in a static/ folder (e.g., style.css).
+
+
+
+
+@app.route('/')
+def home():
+    return "Welcome to the Deepfake Detection App!"
+@app.route('/'): This is a route decorator that maps a specific URL (/) to a function.
+Root URL (/): Refers to the homepage.
+def home():: Defines a function home that handles requests sent to the root URL.
+return statement: The text "Welcome to the Deepfake Detection App!" is returned directly as a response to the web browser.
+
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
+if __name__ == "__main__":
+Ensures the code runs only when the script is executed directly, not when imported as a module.
+app.run(debug=True)
+Starts the Flask development server.
+debug=True:
+Enables the debug mode, allowing the app to automatically restart upon code changes.
+Displays detailed error messages in the browser for easier debugging.

@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Video Upload App</title>
+    <link href="{{ url_for('static', filename='output.css') }}" rel="stylesheet">
+    <style>
+        #bg-video {
+            position: fixed;
+            right: 0;
+            bottom: 0;
+            min-width: 100%;
+            min-height: 100%;
+            width: auto;
+            height: auto;
+            z-index: -1;
+            object-fit: cover;
+        }
+        
+        .glassmorphism {
+            background: rgba(165, 180, 252, 0.25);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.37);
+        }
+        
+        .glassmorphism-light {
+            background: rgba(219, 234, 254, 0.25);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            box-shadow: 0 4px 16px 0 rgba(31, 38, 135, 0.2);
+        }
+        
+        .loader {
+            border: 5px solid rgba(255, 255, 255, 0.3);
+            border-radius: 50%;
+            border-top: 5px solid #3498db;
+            width: 50px;
+            height: 50px;
+            animation: spin 1s linear infinite;
+            display: none;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .upload-form input[type="file"] {
+            display: none;
+        }
+        
+        .button {
+            display: inline-block;
+            padding: 0.75rem 1.5rem;
+            margin: 0.5rem;
+            font-weight: 600;
+            text-align: center;
+            border-radius: 0.5rem;
+            transition: all 0.3s ease;
+        }
+        
+        .select-button {
+            background-color: rgba(99, 102, 241, 0.8);
+            color: white;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .select-button:hover {
+            background-color: rgba(79, 70, 229, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .upload-button {
+            background-color: rgba(16, 185, 129, 0.8);
+            color: white;
+            backdrop-filter: blur(4px);
+            -webkit-backdrop-filter: blur(4px);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+        }
+        
+        .upload-button:hover {
+            background-color: rgba(5, 150, 105, 0.9);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+    </style>
+</head>
+<body class="min-h-screen font-sans text-gray-900 relative">
+    <!-- Full-screen Background Video -->
+    <video autoplay loop muted  id="bg-video">
+        <source src="{{ url_for('static', filename='v.mp4') }}" type="video/mp4">
+        Your browser does not support HTML5 video.
+    </video>
+    
+    <!-- Page Container -->
+    <div class="relative min-h-screen flex flex-col">
+        <!-- Header -->
+        <header class="flex items-center justify-between h-20 bg-blue-300 bg-opacity-80 backdrop-blur-sm px-6 py-4 shadow-md">
+            <img src="./static/logo.png" alt="App Logo" class="w-48 h-auto">
+            <h1 class="text-xl md:text-2xl font-bold">Deep Fake Detection App</h1>
+        </header>
+        
+        <!-- Main Content -->
+        <main class="flex-grow flex items-center justify-center p-4">
+            <div class="max-w-xl w-full mx-auto">
+                <!-- Upload Card with Glassmorphism -->
+                <div class="glassmorphism rounded-2xl py-6 px-8 shadow-lg transition-all duration-300 hover:shadow-xl">
+                    <h2 class="text-2xl font-bold text-gray-800 text-center mb-6">Upload and Preview Video</h2>
+                    
+                    <!-- Video Preview -->
+                    <div class="flex justify-center mb-6">
+                        <video id="videoPreview" controls class="lg:h-[300px] w-[450px] max-w-full shadow-lg hidden rounded-lg"></video>
+                    </div>
+                    
+                    <!-- Placeholder when no video is selected -->
+                    <div id="videoPlaceholder" class="border-2 border-dashed border-white/40 rounded-lg flex items-center justify-center h-[200px] mb-6">
+                        <div class="text-center text-gray-800">
+                            <svg class="mx-auto h-12 w-12" fill="none" stroke="currentColor" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M7 4v16M17 4v16M3 8h18M3 16h18"></path>
+                            </svg>
+                            <p class="mt-2">Your video will appear here</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Loader -->
+                    <div class="flex justify-center mb-4">
+                        <div id="loader" class="loader"></div>
+                    </div>
+                    
+                    <!-- Upload Form -->
+                    <form id="uploadForm" enctype="multipart/form-data" class="upload-form flex flex-col sm:flex-row justify-center items-center gap-4">
+                        <input type="file" name="uploadFile" id="fileInput" accept="video/*">
+                        <label for="fileInput" class="button select-button cursor-pointer w-full sm:w-auto">Select File</label>
+                        <button type="button" id="uploadButton" class="button upload-button w-full sm:w-auto">Upload</button>
+                    </form>
+                </div>
+                
+                <!-- Result Section with Glassmorphism -->
+                <div class="mt-8 flex flex-col sm:flex-row gap-4 items-center justify-center glassmorphism-light p-4 rounded-lg">
+                    <h3 class="text-2xl font-bold text-gray-800">Result:</h3>
+                    <p id="result" class="text-2xl font-semibold"></p>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Footer -->
+        <footer class="bg-blue-300 bg-opacity-80 backdrop-blur-sm flex items-center justify-center h-20 font-bold mt-auto">
+            <p class="text-xl">&copy; 2025 Deep Fake Detection App. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script>
+        const fileInput = document.getElementById('fileInput');
+        const videoPreview = document.getElementById('videoPreview');
+        const videoPlaceholder = document.getElementById('videoPlaceholder');
+        const uploadButton = document.getElementById('uploadButton');
+        const loader = document.getElementById('loader');
+        const result = document.getElementById('result');
+    
+        fileInput.addEventListener('change', function () {
+            const file = fileInput.files[0];
+            console.log("File selected:", file);
+    
+            if (!file) {
+                videoPreview.classList.add('hidden');
+                videoPlaceholder.classList.remove('hidden');
+                return;
+            }
+    
+            // Check if the file is a valid video
+            if (!file.type.startsWith('video/')) {
+                alert('Please select a valid video file.');
+                videoPreview.classList.add('hidden');
+                videoPlaceholder.classList.remove('hidden');
+                return;
+            }
+    
+            // Check if the browser supports the selected video type
+            const canPlay = videoPreview.canPlayType(file.type);
+            if (!canPlay || canPlay === '') {
+                alert('This video format is not supported in your browser.');
+                videoPreview.classList.add('hidden');
+                videoPlaceholder.classList.remove('hidden');
+                return;
+            }
+    
+            // Create a preview URL and load the video
+            try {
+                const fileURL = URL.createObjectURL(file);
+                videoPreview.src = fileURL;
+                videoPreview.classList.remove('hidden');
+                videoPlaceholder.classList.add('hidden');
+                videoPreview.load();
+            } catch (error) {
+                console.error('Error generating preview:', error);
+                alert('Could not preview this video.');
+                videoPreview.classList.add('hidden');
+                videoPlaceholder.classList.remove('hidden');
+            }
+        });
+    
+        uploadButton.addEventListener('click', async function () {
+            const file = fileInput.files[0];
+            if (!file) {
+                alert('Please select a file first.');
+                return;
+            }
+    
+            loader.style.display = 'block';
+            uploadButton.disabled = true;
+            result.innerText = "";
+    
+            const formData = new FormData();
+            formData.append('uploadFile', file);
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                const data = await response.json();
+    
+                loader.style.display = 'none';
+                uploadButton.disabled = false;
+    
+                result.innerText = data.message;
+                result.className = "text-2xl font-semibold";
+                result.classList.add(data.success ? 'text-green-900' : 'text-red-900');
+            } catch (error) {
+                console.error('Error uploading file:', error);
+                loader.style.display = 'none';
+                uploadButton.disabled = false;
+                alert('Failed to upload file.');
+            }
+        });
+    </script>
+</body>
+</html>
